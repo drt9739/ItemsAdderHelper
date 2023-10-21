@@ -1,5 +1,6 @@
 import requests
 import json
+from io import BytesIO
 
 
 class SevenTvEmote:
@@ -11,8 +12,6 @@ class SevenTvEmote:
         self.animated = animated
         self.resolution = resolution
         self.emote_id = emote_id
-
-        self.better_res = max(resolution, key=lambda x: x['width'] and x['height'])
 
     def __str__(self):
         return f"{self.name}"
@@ -27,7 +26,14 @@ class SevenTvEmote:
         return self.name
 
     def get_better_res(self):
-        return self.better_res
+        return max(self.resolution, key=lambda x: x['width'] and x['height'])
+
+    def get_image(self):
+        resolution = self.get_better_res()
+        url = self.url + self.emote_id + '/' + resolution['name']
+        print(url)
+        response = requests.get(url)
+        return response.content
 
 
 class SevenTvApi:
@@ -36,7 +42,7 @@ class SevenTvApi:
     def __init__(self):
         pass
 
-    def get_emote(self, url: str) -> object:
+    def get_emote(self, url: str) -> SevenTvEmote:
         """
         Получает ссылку и обращается по id эмоута к 7tv api
         После создаёт объект класса `SevenTvEmote()` и возвращает его пользователю
@@ -50,6 +56,7 @@ class SevenTvApi:
         name = result["name"]
         animated = result["animated"]
         resolution = result["host"]["files"]
+        emote_id = result["id"]
 
         return SevenTvEmote(name, author, animated, resolution, emote_id)
 
