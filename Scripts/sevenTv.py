@@ -25,13 +25,12 @@ class SevenTvEmote:
     def emote_name(self) -> str:
         return self.name
 
-    def get_better_res(self):
-        return max(self.resolution, key=lambda x: x['width'] and x['height'])
+    def get_better_res(self) -> dict:
+        return sorted(self.resolution, key=lambda x: x['name'] == '4x.webp' or x['name']=='4x.webm', reverse=True)[0]
 
-    def get_image(self):
+    def get_image(self) -> bytes:
         resolution = self.get_better_res()
         url = self.url + self.emote_id + '/' + resolution['name']
-        print(url)
         response = requests.get(url)
         return response.content
 
@@ -51,7 +50,7 @@ class SevenTvApi:
         """
         emote_id = url[16:]
         result = requests.get(self.api + emote_id).json()
-
+        print(json.dumps(result, indent=2, sort_keys=True))
         author = result["owner"]["display_name"]
         name = result["name"]
         animated = result["animated"]
