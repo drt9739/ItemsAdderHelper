@@ -12,6 +12,8 @@ class SevenTvEmote:
         self.resolution = resolution
         self.emote_id = emote_id
 
+        resolution = list(
+            map(lambda x: x if ".gif" in x["name"] or ".png" in x["name"] else {"height": 0, "width": 0}, resolution))
         self.better_res = max(resolution, key=lambda x: x['width'] and x['height'])
 
     def __str__(self):
@@ -29,12 +31,20 @@ class SevenTvEmote:
     def get_better_res(self):
         return self.better_res
 
+    def get_image(self):
+        url = self.url + self.emote_id + "/" +self.get_better_res()["name"]
+        return url
 
 class SevenTvApi:
     api = 'https://7tv.io/v3/'
 
     def __init__(self):
         pass
+
+    def return_json(self, url: str):
+        emote_id = url[16:]
+        result = requests.get(self.api + emote_id).json()
+        return result
 
     def get_emote(self, url: str) -> object:
         """
@@ -51,7 +61,7 @@ class SevenTvApi:
         animated = result["animated"]
         resolution = result["host"]["files"]
 
-        return SevenTvEmote(name, author, animated, resolution, emote_id)
+        return SevenTvEmote(name, author, animated, resolution, emote_id[7:])
 
     def get_emote_set(self, url: str) -> list:
         """
